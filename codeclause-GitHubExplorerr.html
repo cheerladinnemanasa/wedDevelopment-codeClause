@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Explorer</title>
+  <style>
+    #search-container {
+      text-align: center;
+      margin: 20px 0;
+      background: grey
+    }
+
+    #search-input {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+    }
+
+    #search-button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #search-button:hover {
+      background-color: #0056b3;
+    }
+
+    #results-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+
+    }
+
+    .user-card {
+      width: 300px;
+      padding: 20px;
+      margin: 10px;
+      background-color: #f2f2f2;
+      border-radius: 5px;
+    }
+
+    .user-card h3 {
+      margin-top: 0;
+      cursor: pointer;
+      color: #007bff;
+    }
+
+    .user-card h3:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="search-container">
+    <input type="text" id="search-input" placeholder="Enter a GitHub username">
+    <button id="search-button">Search</button>
+  </div>
+  <div id="results-container"></div>
+
+  <script>
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const resultsContainer = document.getElementById('results-container');
+
+    searchButton.addEventListener('click', () => {
+      const username = searchInput.value.trim();
+      if (username !== '') {
+        searchUser(username);
+      }
+    });
+
+    async function searchUser(username) {
+      resultsContainer.innerHTML = '';
+
+      try {
+        const response = await fetch(`https://api.github.com/users/${username}`);
+        if (response.ok) {
+          const user = await response.json();
+          const userCard = createUserCard(user);
+          resultsContainer.appendChild(userCard);
+        } else {
+          throw new Error('Error retrieving user');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function createUserCard(user) {
+      const userCard = document.createElement('div');
+      userCard.classList.add('user-card');
+
+      const usernameElement = document.createElement('h3');
+      usernameElement.innerText = user.login;
+      usernameElement.addEventListener('click', () => {
+        window.location.href = user.html_url;
+      });
+
+      const repositoriesElement = document.createElement('p');
+      repositoriesElement.innerText = `Public Repositories: ${user.public_repos}`;
+
+      const followersElement = document.createElement('p');
+      followersElement.innerText = `Followers: ${user.followers}`;
+
+      userCard.appendChild(usernameElement);
+      userCard.appendChild(repositoriesElement);
+      userCard.appendChild(followersElement);
+
+      return userCard;
+    }
+  </script>
+</body>
+</html>
